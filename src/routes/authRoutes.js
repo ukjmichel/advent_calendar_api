@@ -5,15 +5,8 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 const router = express.Router();
+const db = require('../../db'); // Import the shared database connection
 const jwt_secret = process.env.JWT_SECRET;
-
-// Create a MySQL connection pool
-const db = mysql.createPool({
-  host: 'localhost',
-  user: 'osadmin', // Replace with your MySQL username
-  password: 'adminADMIN69400', // Replace with your MySQL password
-  database: 'oseznoeldb',
-});
 
 // Middleware to authenticate token
 const authenticateToken = (req, res, next) => {
@@ -76,7 +69,7 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    // Fetch user from database
+    // Fetch user by email
     const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [
       email,
     ]);
@@ -86,13 +79,13 @@ router.post('/login', async (req, res) => {
 
     const user = rows[0];
 
-    // Compare passwords
+    // Compare provided password with stored hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Generate a JWT token
+    // Generate JWT
     const token = jwt.sign(
       { id: user.id, email: user.email, username: user.username },
       jwt_secret,
@@ -101,7 +94,7 @@ router.post('/login', async (req, res) => {
 
     res.status(200).json({ message: 'Logged in successfully', token });
   } catch (err) {
-    console.error(err);
+    console.error('Error during login:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
