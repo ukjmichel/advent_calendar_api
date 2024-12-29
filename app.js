@@ -7,6 +7,7 @@ const cors = require('cors');
 //import router
 const authRouter = require('./src/routes/authRoutes'); // Import the auth routes
 const imagesRouter = require('./src/routes/imagesRoutes');
+const calendarRouter = require('./src/routes/calendarRoutes')
 //import .env variable
 require('dotenv').config();
 
@@ -38,6 +39,8 @@ app.get('/', (req, res) => {
 app.use('/auth', authRouter);
 // Use image routes
 app.use('/api', imagesRouter);
+//
+app.use('/calendar',calendarRouter);
 
 // Global error handling middleware
 app.use((err, req, res, next) => {

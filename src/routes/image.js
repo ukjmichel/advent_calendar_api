@@ -3,9 +3,9 @@ const path = require('path');
 
 // Example image table with image file paths
 const images = [
-  { name: 'alley', path: '/images/alley.png' },
-  { name: 'morning-light', path: '/images/morning-light.jpg' },
-  { name: 'venise', path: '/images/venise.webp' },
+  { name: 'alley', path: 'images/alley.png' },
+  { name: 'morning-light', path: 'images/morning-light.jpg' },
+  { name: 'venise', path: 'images/venise.webp' },
 ];
 
 // Function to get the list of images

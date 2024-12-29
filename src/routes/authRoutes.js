@@ -1,11 +1,10 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 const router = express.Router();
-const db = require('../../db'); // Import the shared database connection
+const {db} = require('../../db'); // Import the shared database connection
 const jwt_secret = process.env.JWT_SECRET;
 
 // Middleware to authenticate token
@@ -57,6 +56,25 @@ router.post('/register', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.get('/profile-all', async (req, res) => {
+  try {
+    const query = 'SELECT * FROM users';
+    const [rows] = await db.execute(query);
+
+    res
+      .status(200)
+      .json({ message: 'All users retrieved successfully', data: rows });
+  } catch (error) {
+    console.error('Error retrieving all calendars:', error);
+    res
+      .status(500)
+      .json({
+        message: 'Failed to retrieve users profile',
+        error: error.message,
+      });
   }
 });
 
