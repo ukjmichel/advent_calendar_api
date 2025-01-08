@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const router = express.Router();
-const {db} = require('../../db'); // Import the shared database connection
+const { db } = require('../../db'); // Import the shared database connection
 const jwt_secret = process.env.JWT_SECRET;
 
 // Middleware to authenticate token
@@ -25,6 +25,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Register route
 // Register route
 router.post('/register', async (req, res) => {
   const { email, username, password } = req.body;
@@ -47,14 +48,24 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Insert new user into the database
-    await db.query(
+    const result = await db.query(
       'INSERT INTO users (email, username, password) VALUES (?, ?, ?)',
       [email, username, hashedPassword]
     );
 
-    res.status(201).json({ message: 'User registered successfully' });
+    const userId = result[0].insertId; // Get the inserted user's ID
+
+    // Generate JWT
+    const token = jwt.sign({ id: userId, email, username }, jwt_secret, {
+      expiresIn: '1h',
+    });
+
+    res.status(201).json({
+      message: 'User registered successfully',
+      token,
+    });
   } catch (err) {
-    console.error(err);
+    console.error('Error during registration:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -69,12 +80,37 @@ router.get('/profile-all', async (req, res) => {
       .json({ message: 'All users retrieved successfully', data: rows });
   } catch (error) {
     console.error('Error retrieving all calendars:', error);
-    res
-      .status(500)
-      .json({
-        message: 'Failed to retrieve users profile',
-        error: error.message,
+    res.status(500).json({
+      message: 'Failed to retrieve users profile',
+      error: error.message,
+    });
+  }
+});
+
+router.get('/username/:id', async (req, res) => {
+  const id = req.params.id;
+  try {
+    const query = 'SELECT username FROM users WHERE id = ?';
+    const [rows] = await db.execute(query, [id]);
+
+    if (rows.length === 0) {
+      // No user found with the given ID
+      return res.status(404).json({
+        message: 'No username found for the given ID',
       });
+    }
+
+    // User found, return the username
+    res.status(200).json({
+      message: 'Username found',
+      username: rows[0].username,
+    });
+  } catch (error) {
+    console.error('Error retrieving username:', error);
+    res.status(500).json({
+      message: 'Failed to retrieve username',
+      error: error.message,
+    });
   }
 });
 
@@ -124,13 +160,13 @@ router.get('/profile', authenticateToken, (req, res) => {
 
 // Delete account route
 router.delete('/delete-account', authenticateToken, async (req, res) => {
-  const userId = req.user.id;
+  const userId = `${req.user.id}`;
 
   try {
     // Delete user from the database
     await db.query('DELETE FROM users WHERE id = ?', [userId]);
 
-    res.status(200).json({ message: 'Account deleted successfully' });
+    res.status(200).json({ message: userId });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
