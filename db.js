@@ -1,12 +1,13 @@
 const mysql = require('mysql2/promise');
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 // Create a MySQL connection pool
 const db = mysql.createPool({
-  host: 'localhost',
-  user: 'osadmin', // Replace with your MySQL username
-  password: 'adminADMIN69400', // Replace with your MySQL password
-  database: 'oseznoeldb',
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER, // Replace with your MySQL username
+  password: process.env.DB_PASSWORD, // Replace with your MySQL password
+  database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,

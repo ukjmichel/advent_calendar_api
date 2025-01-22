@@ -18,4 +18,8 @@ function getImageFilePath(relativePath) {
   return path.resolve(__dirname, '../../public', relativePath);
 }
 
-module.exports = { getImages, getImageFilePath };
+function getUploadImageFilePath(relativePath) {
+  return path.resolve(__dirname, '../../uploads', relativePath);
+}
+
+module.exports = { getImages, getImageFilePath, getUploadImageFilePath };

@@ -6,6 +6,7 @@ const {
   getCasesByCalendarId,
   openCase,
   updateCase,
+  getCase,
 } = require('../services/casesServices');
 
 // GET all calendars
@@ -151,6 +152,42 @@ router.get('/cases/:calendar_id', async (req, res) => {
     });
   } catch (error) {
     console.error('Error retrieving cases:', error);
+    res.status(500).json({
+      message: 'Internal server error',
+      error: error.message,
+    });
+  }
+});
+// get specific case
+
+router.get('/cases/:calendar_id/:case_number', async (req, res) => {
+  const calendarId = req.params.calendar_id;
+  const caseNumber = parseInt(req.params.case_number, 10);
+
+  // Validate inputs
+  if (!calendarId || isNaN(caseNumber) || caseNumber < 1 || caseNumber > 24) {
+    return res.status(400).json({
+      message: 'Valid calendar ID and case number are required',
+    });
+  }
+
+  try {
+    // Fetch the specific case
+    const specificCase = await getCase(calendarId, caseNumber);
+
+    if (!specificCase) {
+      return res.status(404).json({
+        message: `Case ${caseNumber} not found for calendar ID: ${calendarId}`,
+      });
+    }
+
+    // Respond with the specific case
+    res.status(200).json({
+      message: `Case ${caseNumber} found`,
+      data: specificCase,
+    });
+  } catch (error) {
+    console.error('Error fetching case:', error);
     res.status(500).json({
       message: 'Internal server error',
       error: error.message,

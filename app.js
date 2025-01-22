@@ -7,6 +7,7 @@ const cors = require('cors');
 const authRouter = require('./src/routes/authRoutes'); // Import the auth routes
 const imagesRouter = require('./src/routes/imagesRoutes');
 const calendarRouter = require('./src/routes/calendarRoutes');
+const uploadRoutes = require('./src/routes/uploadsRoute');
 //import middleware
 const auth = require('./src/middlewares/authMiddleware');
 //import .env variable
@@ -19,7 +20,7 @@ const app = express();
 app.use(
   cors({
     origin: 'http://localhost:4200', // Replace with your frontend URL
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Allowed HTTP methods
     credentials: true, // Allow cookies if needed
   })
 );
@@ -30,6 +31,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve static image files
 app.use('/image', express.static(path.join(__dirname, 'public/image')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.get('/', (req, res) => {
@@ -41,7 +43,10 @@ app.use('/auth', authRouter);
 // Use image routes
 app.use('/api', imagesRouter);
 //
-app.use('/calendar',auth, calendarRouter);
+app.use('/calendar', auth, calendarRouter);
+
+// Use the upload routes
+app.use('/api', uploadRoutes);
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
